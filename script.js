@@ -1,12 +1,47 @@
+// Element references
 const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const taskList = document.getElementById("taskList");
+const priorityInput = document.getElementById("priorityInput");
+const dueDateInput = document.getElementById("dueDateInput");
+const priorityFilter = document.getElementById("priorityFilter");
 
 const completedCount = document.getElementById("completedCount");
-const priorityInput = document.getElementById("priorityInput");
 const remainingCount = document.getElementById("remainingCount");
-const dueDateInput = document.getElementById("dueDateInput");
+const studyTimeDisplay = document.getElementById("studyTime");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+const goalInput = document.getElementById("goalInput");
+const goalText = document.getElementById("goalText");
+const motivationText = document.getElementById("motivationText");
 
+const timerDisplay = document.getElementById("timerDisplay");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+const studyMinutesInput = document.getElementById("studyMinutes");
+const setTimerBtn = document.getElementById("setTimerBtn");
+const breakTimerBtn = document.getElementById("breakTimerBtn");
+const timerMode = document.getElementById("timerMode");
+const notificationBtn = document.getElementById("notificationBtn");
+const themeToggle = document.getElementById("themeToggle");
+
+// Storage keys
+const TASKS_KEY = "FocusFlowTasks";
+const STUDY_TIME_KEY = "FocusFlowStudyTime";
+const STUDY_DATE_KEY = "FocusFlowStudyDate";
+const GOAL_KEY = "FocusFlowGoal";
+const THEME_KEY = "FocusFlowTheme";
+
+// Helpers
+function getTodayString() {
+    const now = new Date();
+    return (
+        now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0")
+    );
+}
+
+// Tasks
 function updateProgress() {
     const tasks = taskList.querySelectorAll("li");
     let completed = 0;
@@ -20,19 +55,17 @@ function updateProgress() {
     completedCount.textContent = completed;
     remainingCount.textContent = tasks.length - completed;
 
-    const progressBar = document.getElementById("progressBar");
-    const progressText = document.getElementById("progressText");
+   
     const percentage = tasks.length === 0 ? 0 : Math.round((completed / tasks.length) * 100);
     progressBar.style.width = percentage + "%";
     progressText.textContent = percentage + "% Completed";
 
-    const goalInput = document.getElementById("goalInput");
-    const goalText = document.getElementById("goalText");
+    
     const goal = Math.max(1, Number(goalInput.value) || 1);
-    goalText.textContent = completed + " of " + goal + " tasks completed"
+    goalText.textContent = completed + " of " + goal + " tasks completed";
 
-    const motivationText = document.getElementById("motivationText");
-    if(tasks.length === 0){
+    
+    if(tasks.length === 0) { 
         motivationText.textContent = "Every small step counts!";
     } else if (completed === tasks.length) {
         motivationText.textContent = "Amazing! You've completed all your tasks for the day!";
@@ -41,9 +74,9 @@ function updateProgress() {
     } else {
         motivationText.textContent = "You've got this! Start with one task.";
     }
-};
+}
 
-function saveTasks(){
+function saveTasks() {
     const tasks = [];
     taskList.querySelectorAll("li").forEach(function(task) {
         tasks.push({
@@ -53,8 +86,38 @@ function saveTasks(){
             dueDate: task.dataset.dueDate || ""
         });
     });
-    localStorage.setItem("FocusFlowTasks", JSON.stringify(tasks));
-    console.log("Tasks saved");
+    try {
+    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    } catch (error) {
+        console.error("Could not save tasks:", error);
+    }
+}
+//Overdue
+function updateDueState(task) {
+    task.classList.remove("overdue", "due-today");
+    const dueDate = task.dataset.dueDate;
+    if (!dueDate || task.classList.contains("completed")) {
+        return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate + "T00:00:00");
+
+    if(due < today) {
+        task.classList.add("overdue");
+    } else if (due.getTime() === today.getTime()) {
+        task.classList.add("due-today");
+    }
+}
+
+// Show or hide selected priority
+function applyFilter() {
+    const selectedPriority = priorityFilter.value;
+    taskList.querySelectorAll("li").forEach(function (task) {
+        const taskPriority = task.dataset.priority || "Medium";
+        const visible = selectedPriority === "All" || taskPriority === selectedPriority;
+        task.style.display = visible ? "flex" : "none";
+    });
 }
 
 function createTask(text, priority = "Medium", completed = false, dueDate = "") {
@@ -87,17 +150,6 @@ function createTask(text, priority = "Medium", completed = false, dueDate = "") 
         dueDateLabel.classList.add("due-date-label");
         dueDateLabel.textContent = "Due: " + dueDate;
         task.appendChild(dueDateLabel);
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const due = new Date(dueDate + "T00:00:00");
-
-        if (!completed && due < today) {
-            task.classList.add("overdue");
-        } else if (!completed && due.getTime() === today.getTime()) {
-            task.classList.add("due-today");
-        }
     }
 
     task.appendChild(deleteBtn);
@@ -108,6 +160,7 @@ function createTask(text, priority = "Medium", completed = false, dueDate = "") 
 
     taskTextSpan.addEventListener("click", function() {
         task.classList.toggle("completed");
+        updateDueState(task);
         updateProgress();
         saveTasks();
     });
@@ -119,249 +172,79 @@ function createTask(text, priority = "Medium", completed = false, dueDate = "") 
     });
 
     taskList.appendChild(task);
+    updateDueState(task);
+    applyFilter();
 }
 
 function loadTasks() {
-    const savedTasks = localStorage.getItem("FocusFlowTasks");
-    if (savedTasks !== null){
-        const tasks = JSON.parse(savedTasks);
-        tasks.forEach(function(savedTask) {
-            createTask(savedTask.text, savedTask.priority || "Medium", savedTask.completed, savedTask.dueDate || "");
-        });
+    try {
+        const savedTasks = localStorage.getItem(TASKS_KEY);
+        if (savedTasks !== null) {
+            JSON.parse(savedTasks).forEach(function(savedTask) {
+                createTask(savedTask.text, savedTask.priority || "Medium", savedTask.completed, savedTask.dueDate || "");
+            });
+        }
+    } catch (error) {
+        console.error("Could not load tasks:", error);
     }
     updateProgress();
 }
 
 function addTask() {
     const taskText = taskInput.value.trim();
-
     if (taskText === "") {
         return;
     }
-    const priority = priorityInput.value;
-    const dueDate = dueDateInput.value;
-    createTask(taskText, priority, false, dueDate);
+    createTask(taskText, priorityInput.value, false, dueDateInput.value);
     taskInput.value = "";
     dueDateInput.value = "";
-        updateProgress();
-        saveTasks();
+    updateProgress();
+    saveTasks();
 }
  addTaskBtn.addEventListener("click", addTask);
- taskInput.addEventListener("keypress", function (event) {
+ taskInput.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         addTask();
     }
  });
-loadTasks();
+priorityFilter.addEventListener("change", applyFilter);
 
-const timerDisplay = document.getElementById("timerDisplay");
-const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
-const studyMinutesInput = document.getElementById("studyMinutes");
-const setTimerBtn = document.getElementById("setTimerBtn");
-const breakTimerBtn = document.getElementById("breakTimerBtn");
-const timerMode = document.getElementById("timerMode");
-
-let timeLeft= 25 * 60;
-let timerInterval = null;
-let currentMode = "study";
-
-const studyTimeDisplay = document.getElementById("studyTime");
-let totalStudySeconds = Number(localStorage.getItem("FocusFlowStudyTime")) || 0;
-
-function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerDisplay.textContent = 
-        String(minutes).padStart(2, "0") + ":" +
-        String(seconds).padStart(2, "0");
+// Daily goal
+try {
+    const savedGoal = localStorage.getItem(GOAL_KEY);
+    if (savedGoal !== null) {
+        goalInput.value = savedGoal;
+    }
+} catch (error) {
+    console.error("Could not load goal:", error);
 }
-function updateStudyTimeDisplay() {
-    const hours = Math.floor(totalStudySeconds / 3600);
-    const minutes = Math.floor((totalStudySeconds % 3600) / 60);
-    
-    studyTimeDisplay.textContent = hours > 0 ? hours + "h " + minutes + "m": minutes + "m";
-}
-function stopTimer() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-}
-function startCountdown(minutes, mode) {
-    stopTimer();
-    currentMode = mode;
-    timeLeft = minutes * 60;
-    timerMode.textContent = mode === "break" ? "Break time" : "Focus time";
-    updateTimerDisplay();
-
-    timerInterval = setInterval(function () {
-        timeLeft--;
-        if(currentMode === "study"){
-            totalStudySeconds++;
-            localStorage.setItem("focudFlowStudyTime", totalStudySeconds);
-            updateStudyTimeDisplay();
-        }
-        updateTimerDisplay();
-        if(timeLeft <= 0) {
-            stopTimer();
-            if(currentMode === "break") {
-                notifyTimerFinished(
-                    "Break is over! Ready to Focus again?"
-                );
-            } else {
-                notifyTimerFinished(
-                    "Study session complete! Great work!"
-                );
-            }
-            timerMode.textContent = "Session complete!"
-        }
-    }, 1000);
-}
-
-startBtn.addEventListener("click", function () {
-    if (timerInterval !== null || timeLeft <= 0) return;
-    currentMode = "study";
-    timerMode.textContent = "Focus time";
-    timerInterval = setInterval(function () {
-        timeLeft--;
-        totalStudySeconds++;
-        localStorage.setItem("FocusFlowStudyTime", totalStudySeconds);
-        updateTimerDisplay();
-        updateStudyTimeDisplay();
-        if (timeLeft <= 0) {
-            stopTimer();
-            notifyTimerFinished("Study session complete! Great work!");
-            timerMode.textContent = "Session complete!";
-        }
-    }, 1000);
-});
-pauseBtn.addEventListener("click", stopTimer);
-resetBtn.addEventListener("click", function () {
-    stopTimer();
-    currentMode = "study";
-    const minutes = Number(studyMinutesInput.value);
-    timeLeft = Number.isInteger(minutes) && minutes >= 1 && minutes <= 180 ? minutes * 60 : 25 * 60;
-    timerMode.textContent = "Ready to Focus?";
-    updateTimerDisplay();
-});
-setTimerBtn.addEventListener("click", function () {
-    const minutes = Number(studyMinutesInput.value);
-    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180)
-    {
-        alert("Choose a whole number from 1 to 180.");
-        return;
-    }   
-    stopTimer();
-    currentMode = "study";
-    timeLeft = minutes * 60;
-    timerMode.textContent = "Ready to Focus?";
-    updateTimerDisplay();
-});
-
-
-
-pauseBtn.addEventListener("click", function () {
-        clearInterval(timerInterval);
-        timerInterval = null;
-});
-resetBtn.addEventListener("click", function () {
-    timerMode.textContent = "Ready to Focus?";
-    clearInterval(timerInterval);
-    timerInterval = null;
-    timeLeft = 25 * 60;
-    updateTimerDisplay();
-});
-breakTimerBtn.addEventListener("click", function() {
-    startCountdown(5, "break");
-});
-updateTimerDisplay();
-updateStudyTimeDisplay();
-
-const goalInput = document.getElementById("goalInput");
-const savedGoal = localStorage.getItem("FocusFlowGoal");
-if (savedGoal !== null) {
-    goalInput.value = savedGoal;
-}   
 goalInput.addEventListener("input", function () {
-    localStorage.setItem("FocusFlowGoal", goalInput.value);
-   updateProgress();
-});
-
-const themeToggle = document.getElementById("themeToggle");
-// Load the saved theme
-if (localStorage.getItem("FocusFlowTheme") === "dark") {
-    document.body.classList.add("dark-mode");
-    themeToggle.textContent = "Light Mode";
-}
-themeToggle.addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-    const isDark = document.body.classList.contains("dark-mode");
-
-    themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
-    localStorage.setItem("FocusFlowTheme", isDark ? "dark" : "light");
-});
-const priorityFilter = document.getElementById("priorityFilter");
-priorityFilter.addEventListener("change", function() {
-    const selectedPriority = priorityFilter.value;
-    const tasks = taskList.querySelectorAll("li");
-    tasks.forEach(function(task) {
-        const taskPriority = task.dataset.priority || "Medium";
-        if (
-            selectedPriority ==="All" || 
-            taskPriority === selectedPriority
-        ) {
-            task.style.display = "flex";
-        } else {
-            task.style.display = "none";
-        }
-    });
-});
-const notificationBtn = document.getElementById("notificationBtn");
-notificationBtn.addEventListener("click", async function () {
-    if (!("Notification" in window)) {
-        alert("Your browser does not support notification.");
-        return;
-    }
     try{
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-            notificationBtn.textContent = "Notification blocked";
-            alert("Please allow notifications in your browser settings.");
-            return;
-        }
-        notificationBtn.textContent = "Notification Enabled";
-        const testNotification = new Notification("FocusFlow", {
-            body: "Notification are working"
-        });
-        testNotification.onclick = function () {
-            window.focus();
-        };
-        console.log("Test notifiction sent");
+        localStorage.setItem(GOAL_KEY, goalInput.value);
     } catch (error) {
-        console.error("notification error:", error);
-        alert("notification error:" + error.message);
+        console.error("Could not save goal:", error);
     }
+    updateProgress();
 });
 
-function notifyTimerFinished(message) {
-    playTimerSound();
-
-    if (!("Notification" in window)) {
-       alert(message);
-       return;
+// Notifications and sound
+function showNotification(message) {
+    if (!("Notification" in window) || Notification.permission !== "granted")
+    {
+        return false;
     }
-    if (Notification.permission === "granted") {
-        new Notification("FocusFlow", {
-            body: message
-        });
-    }else{
-        alert(message);
+    try {
+        new Notification("FocusFlow", {body: message});
+        return true;
+    } catch (error) {
+        console.error("Notification failed:", error);
+        return false;
     }
 }
+
 async function playTimerSound() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if(!AudioContextClass) {
-        console.log("Audio is not supported")
         return;
     }
     try{
@@ -383,11 +266,174 @@ async function playTimerSound() {
         console.error("could not play:", error);
     }
 }
-console.log("Notification support:", "Notification" in window);
-console.log(
-    "Notification permission:",
-    "Notification" in window ? Notification.permission : "unsupported"
-);
-new Notification("FocusFlow Test", {
-    body: "Your notifications are working!"
+
+function notifyTimerFinished(message) {
+    playTimerSound();
+    if (!showNotification(message)) {
+        alert(message);
+    }
+}
+if(!("Notification" in window)) {
+    notificationBtn.textContent = "Notifications unsupported";
+    notificationBtn.disabled = true;
+} else if (Notification.permission === "granted") {
+    notificationBtn.textContent = "Notification Enabled";
+}
+
+notificationBtn.addEventListener("click", async function () {
+    if (!("Notification" in window)) {
+        return;
+    }
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+            notificationBtn.textContent = "Notification Blocked";
+            alert("Please allow notifications in your browser settings.");
+            return;
+        }
+        notificationBtn.textContent = "Notification Enabled";
+        showNotification("Notification error are working");
+    } catch (error) {
+        console.error("notificaion error:", error);
+        alert("notifications error:" + error.message);
+    }
 });
+
+//Study time
+let studyDate = getTodayString();
+let totalStudySeconds = 0;
+
+try{
+    if(localStorage.getItem(STUDY_DATE_KEY) === studyDate) {
+        totalStudySeconds = Number(localStorage.getItem(STUDY_TIME_KEY)) || 0;}
+} catch (error) {
+    console.error("Could not load study time:", error);
+}
+
+function updateStudyTimeDisplay() {
+    const hours = Math.floor(totalStudySeconds / 3600);
+    const minutes = Math.floor((totalStudySeconds % 3600) / 60);
+    studyTimeDisplay.textContent = hours > 0 ? hours + "h " + minutes + "m": minutes + "m";
+}
+
+function addStudySeconds(seconds) {
+    const today = getTodayString();
+    if(today !== studyDate) {
+        studyDate = today;
+        totalStudySeconds = 0;
+    }
+    totalStudySeconds += seconds;
+    try {
+        localStorage.setItem(STUDY_TIME_KEY, totalStudySeconds);
+        localStorage.setItem(STUDY_DATE_KEY, studyDate);
+    } catch (error) {
+        console.error("Could not save study:", error);
+    }
+    updateStudyTimeDisplay();
+}
+//Timer
+let timeLeft = 25 * 60;
+let timerInterval = null;
+let currentMode = "study";
+let endTime = null;
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerDisplay.textContent = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+}
+
+function tick() {
+    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+    const elapsed = timeLeft - remaining;
+    timeLeft = remaining;
+    if (currentMode === "study" && elapsed > 0) {
+        addStudySeconds(elapsed);
+    }
+    updateTimeDisplay();
+
+    if(timeLeft <= 0) {
+        stopTimer();
+        if(currentMode === "break") {
+            timerMode.textContent = "Break over!";
+            notifyTimerFinished("Break is over! Ready to focus again?");
+        } else {
+            timerMode.textContent = "Session complete!";
+            notifyTimerFinished("Study session complete! Great work");
+        }
+    }
+}
+
+// Starts or resumes the timer
+function runTimer() {
+    if (timerInterval !== null || timeLeft <= 0) {
+        return;
+    }
+    endTime = Date.now() + timeLeft * 1000;
+    timerMode.textContent = currentMode === "break" ? "Break time" : "Focus time";
+    timerInterval = setInterval(tick,1000);
+}
+
+function getStudyMinutes() {
+    const minutes = Number(studyMinutesInput.value);
+    return Number.isInterger(minutes) && minutes >= 1 && minutes <= 180 ? minutes : null;
+}
+function resetStudyTimer(minutes) {
+    stopTimer();
+    currentMode = "study";
+    timeLeft = minutes * 60;
+    timerMode.textContent = "Ready to focus?";
+    updateTimerDisplay();
+}
+
+startBtn.addEventListener("click", runTimer);
+pauseBtn.addEventListener("click", function () {
+    if (timerInterval === null) {
+        return;
+    }
+    tick();
+    stopTimer();
+});
+resetBtn.addEventListener("click", function () {
+    resetStudyTimer(getStudyMinutes() || 25);
+});
+setTimerBtn.addEventListener("click", function () {
+    const minutes = getStudyMinutes(); 
+    if (minutes === null) {
+        alert("Choose a whole number from 1 to 180.");
+        return;
+    }
+    resetStudyTimer(minutes);
+});
+breakTimerBtn.addEventListener("click", function (){
+    stopTimer();
+    currentMode = "break";
+    timeLeft = 5 * 60;
+    updateTimerDisplay();
+    runTimer();
+});
+
+//Theme
+try {
+    if(localStorage.getItem(THEME_KEY) === "dark") {
+        document.body.classList.add("dark-mode");
+        themeToggle.textContent = "Light Mode";
+    }
+} catch (error) {
+    console.error("Could not load theme:", error);
+}
+
+themeToggle.addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
+    themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+    try {
+        localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+    } catch (error) {
+        console.error("Could not save theme:", error);
+    }
+});
+
+loadTasks();
+updateTimerDisplay();
+updateStudyTimeDisplay();

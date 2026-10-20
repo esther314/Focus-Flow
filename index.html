@@ -42,7 +42,7 @@
                 <p id="motivationText">Every small step counts!</p>
             </div>
         </section>
-        <section class="tasks">
+        < section class="tasks">
             <h2>Today's Tasks</h2>
             <div class="task-input">
                 <input type="text" id="taskInput" placeholder="What do you need to do?">
@@ -51,7 +51,7 @@
                     <option value="Medium">Medium Priority</option>
                     <option value="High">High Priority</option>
                 </select>
-                <input type="date" id="dueDateInput">
+                <input type="date" id="dueDateInput" aria-label="Due date">
                 <button type="button" id="addTaskBtn">Add Task</button>
             </div>
             <div class="task-filters">
@@ -76,8 +76,8 @@
                     Enable Notifications
                 </button>
             </div>
-            <p id="timerMode">Ready to focus?</p>
-            <div id="timerDisplay">25:00</div>
+            <p id="timerMode" aria-live="polite">Ready to focus?</p>
+            <div id="timerDisplay" role="timer">25:00</div>
             <div class="timer-buttons">
                 <button type="button" id="startBtn">Start</button>
                 <button type="button" id="pauseBtn">Pause</button>

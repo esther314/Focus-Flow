@@ -38,6 +38,13 @@ h2 {
     margin-top: 0;
 }
 
+/* Keyboard focus */
+button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid #6C4ab6;
+    outline-offset: 2px;
+}
+
+/* Dashboard */
 .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -58,6 +65,65 @@ h2 {
     margin: 0;
 }
 
+.progress-container {
+    width: 100%;
+    height: 14px;
+    background-color: #eee8ff;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #6c4ab6;
+    border-radius: 20px;
+    transition: width 0.4s ease-in-out;
+}
+#progressText {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color:#6f687d;
+}
+.daily-goal {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #f4f1ff;
+    border-radius: 12px;
+}
+.daily-goal h3 {
+    margin-top: 0;
+    color: black;
+}
+body.dark-mode .daily-goal h3{
+    color: white;
+}
+
+#goalInput {
+    width: 80px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid #ddd5ee;
+    font-size: 16px;
+    margin-top: 10px;
+}
+#goalText {
+    margin-bottom: 0;
+    color:#6f687d;
+}
+#motivationText {
+    text-align: center;
+    font-style: italic;
+    color:#6C4ab6;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+body.dark-mode #motivationText {
+    color: lightgray;
+}
+/* Tasks */
 .task-input {
     display: flex;
     gap: 10px;
@@ -122,6 +188,7 @@ h2 {
     background-color: #d8c7fa;
 }
 
+/* Timer */
 #timerDisplay {
     font-size: 48px;
     font-weight: bold;
@@ -151,64 +218,7 @@ h2 {
     text-align: center;
     color:#6f687d;
 }
-.progress-container {
-    width: 100%;
-    height: 14px;
-    background-color: #eee8ff;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-top: 20px;
-}
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background-color: #6c4ab6;
-    border-radius: 20px;
-    transition: width 0.4s ease-in-out;
-}
-#progressText {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
-    color:#6f687d;
-}
-.daily-goal {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: #f4f1ff;
-    border-radius: 12px;
-}
-.daily-goal h3 {
-    margin-top: 0;
-    color: black;
-}
-body.dark-mode .daily-goal h3{
-    color: white;
-}
 
-#goalInput {
-    width: 80px;
-    padding: 8px;
-    border-radius: 8px;
-    border: 2px solid #ddd5ee;
-    font-size: 16px;
-    margin-top: 10px;
-}
-#goalText {
-    margin-bottom: 0;
-    color:#6f687d;
-}
-#motivationText {
-    text-align: center;
-    font-style: italic;
-    color:#6C4ab6;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 20px;
-}
-body.dark-mode #motivationText {
-    color: lightgray;
-}
 #themeToggle{
     padding: 10px 16px;
     margin-top: 15px;
@@ -418,6 +428,6 @@ body.dark-mode #timerMode {
 }
 body.dark-mode #notificationBtn {
     background-color: #6C4ab6;
-    color: white;
+    color: black;
     border: 0;
 }
