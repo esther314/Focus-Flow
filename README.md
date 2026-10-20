@@ -28,4 +28,8 @@ Sort tasks by due date
 Weekly study statistics
 Drag and drop to reorder tasks
 
+<<<<<<< HEAD
 Made by https://github.com/esther314/Focus-Flow
+=======
+Made by https://github.com/esther314/Focus-Flow
+>>>>>>> 8c248721c5f53e7eac5cdae4e5c3e7c0f36b1fff
