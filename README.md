@@ -10,7 +10,7 @@ Filtering: show all tasks or only a certain priority level.
 Due date highlighting: overdue tasks and tasks due today are highlighted.
 Study timer: custom study duration(1-180 minutes), pause and resume, and a 5-minute break timer.
 Study timer tracking: total study time for the day, which resets each morning.
-Daily goal: set how many tasks you want to finish today and track progress with a progress bar and motivaional messages.
+Daily goal: set how many tasks  you want to finish today and track progress with a progress bar and motivaional messages.
 Dark mode: toggle between light and dark themes.
 Saved data: tasks, goal, theme, and study time are stored in your browser with localStorage, so they are still there when user comes back.
 Notifications: a browser notification and sound when a session or break ends.

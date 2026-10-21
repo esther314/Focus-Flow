@@ -292,7 +292,7 @@ notificationBtn.addEventListener("click", async function () {
             return;
         }
         notificationBtn.textContent = "Notification Enabled";
-        showNotification("Notification error are working");
+        showNotification("Notification are working");
     } catch (error) {
         console.error("notificaion error:", error);
         alert("notifications error:" + error.message);
@@ -342,7 +342,10 @@ function updateTimerDisplay() {
     const seconds = timeLeft % 60;
     timerDisplay.textContent = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
 }
-
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+}
 function tick() {
     const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
     const elapsed = timeLeft - remaining;
@@ -350,7 +353,7 @@ function tick() {
     if (currentMode === "study" && elapsed > 0) {
         addStudySeconds(elapsed);
     }
-    updateTimeDisplay();
+    updateTimerDisplay();
 
     if(timeLeft <= 0) {
         stopTimer();
@@ -376,7 +379,7 @@ function runTimer() {
 
 function getStudyMinutes() {
     const minutes = Number(studyMinutesInput.value);
-    return Number.isInterger(minutes) && minutes >= 1 && minutes <= 180 ? minutes : null;
+    return Number.isInteger(minutes) && minutes >= 1 && minutes <= 180 ? minutes : null;
 }
 function resetStudyTimer(minutes) {
     stopTimer();
