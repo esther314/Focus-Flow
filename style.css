@@ -197,8 +197,12 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     text-decoration: line-through;
     opacity: 0.5;
 }
-#taskList li span {
+#taskList li .task-text{
     flex: 1;
+    min-width: 0;
+}
+#taskList li .priority-label, taskList li .due-date-label {
+    flex: 0 0 auto;
 }
 #taskList li.overdue {
     background-color: #ffe3e3;
@@ -409,6 +413,7 @@ body.dark-mode #notificationBtn {
 }
 
 /* Phones */
+
 @media (max-width: 600px) {
     .task-input {
         flex-wrap: wrap;
@@ -420,4 +425,20 @@ body.dark-mode #notificationBtn {
         flex: 1;
         min-width: 150px;
     }
-}
+    .progress-container{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .stat-card {
+        min-width: 0;
+        width: auto;
+        box-sizing: border-box;
+        padding: 12px 6px;
+    }
+    .stat-card h3 {
+        font-size: 1.25rem;
+    }
+}   

@@ -1,5 +1,6 @@
 # Focus-Flow
-A web app that combines tasks, goals, a timer, and daily progress.
+FocusFlow is a productivity web app designed to help students organize their tasks and manage their time.
+Users can create and prioritize tasks, track deadlines, monitor their progress toward daily goals, and use a study timer with break reminders. Focusflow also includes saved task data, study-time tracking, browser notifications, and dark mode.
 
 https://focusflow-blush-one.vercel.app/
 ![FocusFlow screenshot](image.png)
@@ -17,6 +18,11 @@ Notifications: a browser notification and sound when a session or break ends.
 
 Built with HTML, CSS, and JavaScript
 
+Project Structure
+index.html - Contains app's HTML structure.
+style.css - Contains app's styling.
+script.js - Handles task management, timer, and interactive features.
+
 What I learned:
 localStorage
 working with browser APIs
@@ -28,8 +34,4 @@ Sort tasks by due date
 Weekly study statistics
 Drag and drop to reorder tasks
 
-<<<<<<< HEAD
-Made by https://github.com/esther314/Focus-Flow
-=======
-Made by https://github.com/esther314/Focus-Flow
->>>>>>> 8c248721c5f53e7eac5cdae4e5c3e7c0f36b1fff
+Made by [Esther Shodeinde](https://github.com/esther314)
